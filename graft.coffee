@@ -227,7 +227,10 @@ childUpdater = (element, value) ->
   element.withProperties children: flatten(asArray(value))
 
 replaceUpdater = (element, value) ->
-  flatten(value)
+  if isArray(value)
+    flatten(value)
+  else
+    value
 
 matchersFrom = (selectorString) ->
   # start and end are always empty strings because they are before and
