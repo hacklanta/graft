@@ -43,6 +43,10 @@ flatten = (list) ->
 
     newList
 
+inArray = (list, toFind) ->
+  fold list, false, (found, item) ->
+    found || item == toFind
+
 isArray = (object) ->
   Object.prototype.toString.call(object) == '[object Array]'
 
