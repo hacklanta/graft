@@ -250,9 +250,7 @@ matchersFrom = (selectorString) ->
     matchersSoFar
 
 idSelectorFor = (id) ->
-  (element) ->
-    console.log 'matching', element, 'with id', element.attributes.id, 'to', id
-    element.attributes.id == id
+  (element) -> element.attributes.id == id
 
 classSelectorFor = (className) ->
   (element) -> inArray element.classes, className
