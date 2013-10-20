@@ -217,7 +217,7 @@ appendingAttributeUpdaterFor = (attribute) ->
   (element, value) ->
     attributeValue = element.attributes[attribute] + ' ' + value
 
-    element.withAttribute attribute, attributeObject
+    element.withAttribute attribute, attributeValue
 
 replacingAttributeUpdaterFor = (attribute) ->
   (element, value) ->
