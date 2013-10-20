@@ -189,7 +189,7 @@ selectorAndUpdateFunctionsFrom = (selectorString) ->
     [
       selectorFrom(strippedSelectorString),
       if attribute.charAt(attribute.length - 1) == '+'
-        appendingAttributeUpdaterFor attribute
+        appendingAttributeUpdaterFor attribute.substring(0, attribute.length - 1)
       else
         replacingAttributeUpdaterFor attribute
     ]
