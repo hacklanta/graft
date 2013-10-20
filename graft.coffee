@@ -37,7 +37,7 @@ fold = (list, accumulator, folder) ->
 flatten = (list) ->
   fold list, [], (newList, item) ->
     if isArray(item)
-      newList.concat item
+      newList = newList.concat item
     else
       newList.push item
 
