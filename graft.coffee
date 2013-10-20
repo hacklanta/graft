@@ -70,7 +70,7 @@ class Element
     properties.attributes ||= []
     this[property] = value for property, value of properties
 
-    @classes = @attributes['class']?.split('\\s+') || []
+    @classes = @attributes['class']?.split(/\s+/) || []
 
   text: ->
     fold @children, '', (textSoFar, child) ->
