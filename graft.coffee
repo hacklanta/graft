@@ -83,6 +83,7 @@ class Element
   # - Tag modified attributes
   withProperties: (properties) ->
     new Element
+      name: properties.name || @name
       parent: properties.parent || @parent
       children: properties.children || @children
       text: properties.text || @text
@@ -108,6 +109,7 @@ window.structureFromElement = (element) ->
 
   structure =
     new Element
+      name: element.nodeName.toLowerCase()
       children: children
       attributes: fold element.attributes, {}, (attributesSoFar, attribute) ->
         attributesSoFar[attribute.name] = attribute.value
