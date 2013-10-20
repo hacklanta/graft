@@ -172,9 +172,10 @@ updaterFor = (selectorString, transform) ->
         # First apply to children, then apply to this level.
         updatedChild =
           child.withProperties
-            children:
+            children: flatten(
               for element in child.children
                 updater(element)
+            )
 
         if selector(updatedChild)
           update updatedChild, transform(updatedChild)
