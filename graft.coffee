@@ -215,7 +215,11 @@ selectorFrom = (selectorString) ->
 
 appendingAttributeUpdaterFor = (attribute) ->
   (element, value) ->
-    attributeValue = element.attributes[attribute] + ' ' + value
+    attributeValue =
+      if element.attributes[attribute]
+        element.attributes[attribute] + ' ' + value
+      else
+        value
 
     element.withAttribute attribute, attributeValue
 
