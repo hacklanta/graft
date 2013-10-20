@@ -207,7 +207,11 @@ selectorAndUpdateFunctionsFrom = (selectorString) ->
     ]
 
 selectorFrom = (selectorString) ->
-  (element) -> true # always select everything for now
+  matchers = matchersFrom selectorString
+
+  (element) ->
+    fold matchers, true, (matching, matcher) ->
+      matching && matcher(element)
 
 appendingAttributeUpdaterFor = (attribute) ->
   (element, value) ->
@@ -224,3 +228,33 @@ childUpdater = (element, value) ->
 
 replaceUpdater = (element, value) ->
   flatten(value)
+
+matchersFrom = (selectorString) ->
+  # start and end are always empty strings because they are before and
+  # after the place where the string was split by this regex, respectively
+  [_, selectorParts..., _] = selectorString.split /([#.]?[^ #.]+)/
+
+  # We have to deal with these in twos
+  fold selectorParts, [], (matchersSoFar, selectorPart) ->
+    matchersSoFar.push(
+      switch selectorPart.charAt(0)
+        when '#'
+          idSelectorFor(selectorPart.substring(1))
+        when '.'
+          classSelectorFor(selectorPart.substring(1))
+        else
+          nodeNameSelectorFor(selectorPart)
+    )
+
+    matchersSoFar
+
+idSelectorFor = (id) ->
+  (element) ->
+    console.log 'matching', element, 'with id', element.attributes.id, 'to', id
+    element.attributes.id == id
+
+classSelectorFor = (className) ->
+  (element) -> inArray element.classes, className
+
+nodeNameSelectorFor = (name) ->
+  (element) -> element.name == name
