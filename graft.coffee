@@ -162,8 +162,7 @@ graftSelector = (selectorString, generator) ->
     updater element
 
 updaterFor = (selectorString, transform) ->
-  selector = selectorFromSelectorString selectorString
-  update = updateFunctionFromSelectorString selectorString
+  [selector, update] = selectorAndUpdateFunctionsFrom selectorString
 
   updater =
     (child) ->
@@ -182,22 +181,33 @@ updaterFor = (selectorString, transform) ->
         else
           updatedChild
 
-selectorFromSelectorString = (selectorString) ->
-  (element) -> true # always select everything for now
-
-updateFunctionFromSelectorString = (selectorString) ->
+selectorAndUpdateFunctionsFrom = (selectorString) ->
   match = null
-  if match = /(.*)\[([^\]]+)\]$/.exec(selectorString)
-    [strippedSelector, attribute] = match[1..]
+  if match = /(.*) \[([^\]]+)\]$/.exec(selectorString)
+    [strippedSelectorString, attribute] = match[1..]
+    
+    [
+      selectorFrom(strippedSelectorString),
+      if attribute.charAt(attribute.length - 1) == '+'
+        appendingAttributeUpdaterFor attribute
+      else
+        replacingAttributeUpdaterFor attribute
+    ]
+  else if match = /(.*) \*$/.exec(selectorString)
+    [strippedSelectorString, _] = match[1..]
 
-    if attribute.charAt(attribute.length - 1) == '+'
-      appendingAttributeUpdaterFor attribute
-    else
-      replacingAttributeUpdaterFor attribute
-  else if selectorString.charAt(selectorString.length - 1) == '*'
-    childUpdater
+    [
+      selectorFrom(strippedSelectorString),
+      childUpdater
+    ]
   else
-    replaceUpdater
+    [
+      selectorFrom(selectorString),
+      replaceUpdater
+    ]
+
+selectorFrom = (selectorString) ->
+  (element) -> true # always select everything for now
 
 appendingAttributeUpdaterFor = (attribute) ->
   (element, value) ->
