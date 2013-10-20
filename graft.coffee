@@ -67,6 +67,7 @@ asMappableArray = (array) ->
 
 class Element
   constructor: (properties) ->
+    properties.attributes ||= []
     this[property] = value for property, value of properties
 
   text: ->
