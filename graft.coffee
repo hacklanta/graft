@@ -84,7 +84,6 @@ class Element
   withProperties: (properties) ->
     new Element
       name: properties.name || @name
-      parent: properties.parent || @parent
       children: properties.children || @children
       text: properties.text || @text
       attributes: properties.attributes || @attributes
