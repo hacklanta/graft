@@ -82,10 +82,25 @@ class GraftElement
   # - Use Object.create for diff-cloning?
   # - Tag modified attributes
   withProperties: (properties) ->
+    children =
+      if properties.text && properties.children
+        [properties.text].concat(properties.children)
+      else if properties.children
+        properties.children
+      else if properties.text && @children
+        childrenWithoutPrefixText = @children.slice(0)
+        while childrenWithoutPrefixText[0] && typeof childrenWithoutPrefixText[0] == 'string'
+          childrenWithoutPrefixText.shift()
+
+        [properties.text].concat(childrenWithoutPrefixText)
+      else if properties.text
+        [properties.text]
+      else
+        @children
+
     new GraftElement
       name: properties.name || @name
-      children: properties.children || @children
-      text: properties.text || @text
+      children: children
       attributes: properties.attributes || @attributes
 
   withAttribute: (attribute, value) ->
