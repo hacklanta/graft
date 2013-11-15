@@ -79,8 +79,27 @@ class GraftElement
       else
         textSoFar
 
-  # - Use Object.create for diff-cloning?
-  # - Tag modified attributes
+  # Creates a copy of this GraftElement with its existing properties
+  # superceded by any passed in.
+  #
+  # Two special things to keep in mind:
+  #  - Specifying the `attributes` property will replace all attributes
+  #    in the copy with the ones you specify. You can add or modify a
+  #    single attribute using the `withAttribute` method.
+  #  - Specifying the `text` property can have a few effects:
+  #    * If the `children` property is also specified, the children of
+  #      the new element will be the children in the `children` property
+  #      with the value of the `text` property prepended.
+  #    * If `children` is not specified and the current element has children,
+  #      all strings at the beginning of the current element's children will
+  #      be replaced by the value of the `text` property. If there are no
+  #      strings at the beginning, the value of the `text` property will simply
+  #      be prepended.
+  #    * If there are no children, the new element will have a single string
+  #      child that is the value of the `text` property.
+  #
+  # TODO Use Object.create for diff-cloning?
+  # TODO Tag modified attributes
   withProperties: (properties) ->
     children =
       if properties.text && properties.children
