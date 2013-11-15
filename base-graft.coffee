@@ -266,4 +266,7 @@ classSelectorFor = (className) ->
   (element) -> inArray element.classes, className
 
 nodeNameSelectorFor = (name) ->
-  (element) -> element.name == name
+  if name == '*'
+    (_) -> true
+  else
+    (element) -> element.name == name
