@@ -65,7 +65,7 @@ asMappableArray = (array) ->
   map: (fn) -> asMapableArray(fn(item) for item in @array)
   array: array
 
-class Element
+class GraftElement
   constructor: (properties) ->
     properties.attributes ||= []
     this[property] = value for property, value of properties
@@ -82,7 +82,7 @@ class Element
   # - Use Object.create for diff-cloning?
   # - Tag modified attributes
   withProperties: (properties) ->
-    new Element
+    new GraftElement
       name: properties.name || @name
       children: properties.children || @children
       text: properties.text || @text
@@ -107,7 +107,7 @@ window.structureFromElement = (element) ->
       childrenSoFar
 
   structure =
-    new Element
+    new GraftElement
       name: element.nodeName.toLowerCase()
       children: children
       attributes: fold element.attributes, {}, (attributesSoFar, attribute) ->
