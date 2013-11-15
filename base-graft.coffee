@@ -114,8 +114,12 @@ window.structureFromElement = (element) ->
         attributesSoFar[attribute.name] = attribute.value
         attributesSoFar
 
-window.graft = (generator) ->
-  transformationFromGenerator generator
+window.graft = (generators...) ->
+  transformations = (transformationFromGenerator(generator) for generator in generators)
+  
+  (element) ->
+    fold transformations, element, (latestElement, transformation) ->
+      transformation(latestElement)
 
 transformationFromGenerator = (generator) ->
   switch typeof generator
