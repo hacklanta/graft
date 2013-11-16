@@ -244,35 +244,14 @@ selectorAndUpdateFunctionsFrom = (selectorString) ->
       replaceUpdater
     ]
 
+# - Selectors
+
 selectorFrom = (selectorString) ->
   matchers = matchersFrom selectorString
 
   (element) ->
     fold matchers, true, (matching, matcher) ->
       matching && matcher(element)
-
-appendingAttributeUpdaterFor = (attribute) ->
-  (element, value) ->
-    attributeValue =
-      if element.attributes[attribute]
-        element.attributes[attribute] + ' ' + value
-      else
-        value
-
-    element.withAttribute attribute, attributeValue
-
-replacingAttributeUpdaterFor = (attribute) ->
-  (element, value) ->
-    element.withAttribute attribute, value
-
-childUpdater = (element, value) ->
-  element.withProperties children: flatten(asArray(value))
-
-replaceUpdater = (element, value) ->
-  if isArray(value)
-    flatten(value)
-  else
-    value
 
 matchersFrom = (selectorString) ->
   # start and end are always empty strings because they are before and
@@ -304,3 +283,28 @@ nodeNameSelectorFor = (name) ->
     (_) -> true
   else
     (element) -> element.name == name
+
+# - Updaters
+
+appendingAttributeUpdaterFor = (attribute) ->
+  (element, value) ->
+    attributeValue =
+      if element.attributes[attribute]
+        element.attributes[attribute] + ' ' + value
+      else
+        value
+
+    element.withAttribute attribute, attributeValue
+
+replacingAttributeUpdaterFor = (attribute) ->
+  (element, value) ->
+    element.withAttribute attribute, value
+
+childUpdater = (element, value) ->
+  element.withProperties children: flatten(asArray(value))
+
+replaceUpdater = (element, value) ->
+  if isArray(value)
+    flatten(value)
+  else
+    value
