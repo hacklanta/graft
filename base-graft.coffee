@@ -149,162 +149,169 @@ window.structureFromElement = (element) ->
         attributesSoFar
 
 window.graft = (generators...) ->
-  transformations = (transformationFromGenerator(generator) for generator in generators)
+  (new BaseGraft).graft generators...
+
+class BaseGraft
+  graft: (generators...) ->
+    transformations = (@transformationFromGenerator(generator) for generator in generators)
   
-  (element) ->
-    fold transformations, element, (latestElement, transformation) ->
-      transformation(latestElement)
+    (element) ->
+      fold transformations, element, (latestElement, transformation) ->
+        transformation(latestElement)
 
-transformationFromGenerator = (generator) ->
-  switch typeof generator
-    when 'string' or 'number'
-      graftContentGenerator generator
-    when 'function'
-      graftFunctionGenerator generator
-    when 'object'
-      if generator.map?
-        graftArrayGenerators generator
-      else if isArray(generator)
-        graftArrayGenerators asMappableArray(generator)
-      else
-        graftObjectGenerator generator
-
-graftContentGenerator = (generator) ->
-  (element) -> generator
-
-graftFunctionGenerator = (generator) ->
-  (element) -> generator(element)
-
-graftArrayGenerators = (generators) ->
-  transformations = generators.map(transformationFromGenerator)
-
-  (element) ->
-    transformations.map (transformation) ->
-      transformation element
-
-graftObjectGenerator = (generator) ->
-  transformations =
-    for selectorString, generators of generator
-      graftSelector selectorString, generators
-
-  (element) ->
-    fold transformations, element, (updatedElement, transform) ->
-      transform updatedElement
-
-graftSelector = (selectorString, generator) ->
-  transform = graft generator
-  updater = updaterFor selectorString, transform
-
-  (element) ->
-    updater element
-
-updaterFor = (selectorString, transform) ->
-  [selector, update] = selectorAndUpdateFunctionsFrom selectorString
-
-  updater =
-    (child) ->
-      if typeof child == 'string'
-        child
-      else
-        # First apply to children, then apply to this level.
-        updatedChild =
-          child.withProperties
-            children: flatten(
-              for element in child.children
-                updater(element)
-            )
-
-        if selector(updatedChild)
-          update updatedChild, transform(updatedChild)
+  transformationFromGenerator: (generator) ->
+    switch typeof generator
+      when 'string' or 'number'
+        @graftContentGenerator generator
+      when 'function'
+        @graftFunctionGenerator generator
+      when 'object'
+        if generator.map?
+          @graftArrayGenerators generator
+        else if isArray(generator)
+          @graftArrayGenerators asMappableArray(generator)
         else
-          updatedChild
+          @graftObjectGenerator generator
 
-selectorAndUpdateFunctionsFrom = (selectorString) ->
-  match = null
-  if match = /(.*) \[([^\]]+)\]$/.exec(selectorString)
-    [strippedSelectorString, attribute] = match[1..]
+  graftContentGenerator: (generator) ->
+    (element) -> generator
+
+  graftFunctionGenerator: (generator) ->
+    (element) -> generator(element)
+
+  graftArrayGenerators: (generators) ->
+    transformations =
+      generators.map (generator) =>
+        @transformationFromGenerator(generator)
+
+    (element) ->
+      transformations.map (transformation) ->
+        transformation element
+
+  graftObjectGenerator: (generator) ->
+    transformations =
+      for selectorString, generators of generator
+        @graftSelector selectorString, generators
+
+    (element) ->
+      fold transformations, element, (updatedElement, transform) ->
+        transform updatedElement
+
+  graftSelector: (selectorString, generator) ->
+    transform = @graft generator
+    updater = @updaterFor selectorString, transform
+
+    (element) ->
+      updater element
+
+  updaterFor: (selectorString, transform) ->
+    [selector, update] = @selectorAndUpdateFunctionsFrom selectorString
+
+    updater =
+      (child) ->
+        if typeof child == 'string'
+          child
+        else
+          # First apply to children, then apply to this level.
+          updatedChild =
+            child.withProperties
+              children: flatten(
+                for element in child.children
+                  updater(element)
+              )
+
+          if selector(updatedChild)
+            update updatedChild, transform(updatedChild)
+          else
+            updatedChild
+
+  selectorAndUpdateFunctionsFrom: (selectorString) ->
+    match = null
+    if match = /(.*) \[([^\]]+)\]$/.exec(selectorString)
+      [strippedSelectorString, attribute] = match[1..]
     
-    [
-      selectorFrom(strippedSelectorString),
-      if attribute.charAt(attribute.length - 1) == '+'
-        appendingAttributeUpdaterFor attribute.substring(0, attribute.length - 1)
-      else
-        replacingAttributeUpdaterFor attribute
-    ]
-  else if match = /(.*) \*$/.exec(selectorString)
-    [strippedSelectorString, _] = match[1..]
-
-    [
-      selectorFrom(strippedSelectorString),
-      childUpdater
-    ]
-  else
-    [
-      selectorFrom(selectorString),
-      replaceUpdater
-    ]
-
-# - Selectors
-
-selectorFrom = (selectorString) ->
-  matchers = matchersFrom selectorString
-
-  (element) ->
-    fold matchers, true, (matching, matcher) ->
-      matching && matcher(element)
-
-matchersFrom = (selectorString) ->
-  # start and end are always empty strings because they are before and
-  # after the place where the string was split by this regex, respectively
-  [_, selectorParts..., _] = selectorString.split /([#.]?[^ #.]+)/
-
-  # We have to deal with these in twos
-  fold selectorParts, [], (matchersSoFar, selectorPart) ->
-    matchersSoFar.push(
-      switch selectorPart.charAt(0)
-        when '#'
-          idSelectorFor(selectorPart.substring(1))
-        when '.'
-          classSelectorFor(selectorPart.substring(1))
+      [
+        @selectorFrom(strippedSelectorString),
+        if attribute.charAt(attribute.length - 1) == '+'
+          @appendingAttributeUpdaterFor attribute.substring(0, attribute.length - 1)
         else
-          nodeNameSelectorFor(selectorPart)
-    )
+          @replacingAttributeUpdaterFor attribute
+      ]
+    else if match = /(.*) \*$/.exec(selectorString)
+      [strippedSelectorString, _] = match[1..]
 
-    matchersSoFar
+      [
+        @selectorFrom(strippedSelectorString),
+        @childUpdater
+      ]
+    else
+      [
+        @selectorFrom(selectorString),
+        @replaceUpdater
+      ]
 
-idSelectorFor = (id) ->
-  (element) -> element.attributes.id == id
+  # - Selectors
 
-classSelectorFor = (className) ->
-  (element) -> inArray element.classes, className
+  selectorFrom: (selectorString) ->
+    matchers = @matchersFrom selectorString
 
-nodeNameSelectorFor = (name) ->
-  if name == '*'
-    (_) -> true
-  else
-    (element) -> element.name == name
+    (element) ->
+      fold matchers, true, (matching, matcher) ->
+        matching && matcher(element)
 
-# - Updaters
+  matchersFrom: (selectorString) ->
+    # start and end are always empty strings because they are before and
+    # after the place where the string was split by this regex, respectively
+    [_, selectorParts..., _] = selectorString.split /([#.]?[^ #.]+)/
 
-appendingAttributeUpdaterFor = (attribute) ->
-  (element, value) ->
-    attributeValue =
-      if element.attributes[attribute]
-        element.attributes[attribute] + ' ' + value
+    # We have to deal with these in twos
+    fold selectorParts, [], (matchersSoFar, selectorPart) =>
+      matchersSoFar.push(
+        switch selectorPart.charAt(0)
+          when '#'
+            @idSelectorFor(selectorPart.substring(1))
+          when '.'
+            @classSelectorFor(selectorPart.substring(1))
+          else
+            @nodeNameSelectorFor(selectorPart)
+      )
+
+      matchersSoFar
+
+  idSelectorFor: (id) ->
+    (element) -> element.attributes.id == id
+
+  classSelectorFor: (className) ->
+    (element) -> inArray element.classes, className
+
+  nodeNameSelectorFor: (name) ->
+    if name == '*'
+      (_) -> true
+    else
+      (element) -> element.name == name
+
+  constructor: ->
+    # - Updaters
+
+    @appendingAttributeUpdaterFor = (attribute) ->
+      (element, value) ->
+        attributeValue =
+          if element.attributes[attribute]
+            element.attributes[attribute] + ' ' + value
+          else
+            value
+
+        element.withAttribute attribute, attributeValue
+
+    @replacingAttributeUpdaterFor = (attribute) ->
+      (element, value) ->
+        element.withAttribute attribute, value
+
+    @childUpdater = (element, value) ->
+      element.withProperties children: flatten(asArray(value))
+
+    @replaceUpdater = (element, value) ->
+      if isArray(value)
+        flatten(value)
       else
         value
-
-    element.withAttribute attribute, attributeValue
-
-replacingAttributeUpdaterFor = (attribute) ->
-  (element, value) ->
-    element.withAttribute attribute, value
-
-childUpdater = (element, value) ->
-  element.withProperties children: flatten(asArray(value))
-
-replaceUpdater = (element, value) ->
-  if isArray(value)
-    flatten(value)
-  else
-    value
