@@ -65,6 +65,9 @@ asMappableArray = (array) ->
   map: (fn) -> asMapableArray(fn(item) for item in @array)
   array: array
 
+copyGraftElementWithProperties = (element, updatedProperties) ->
+  new GraftElement properties
+
 class GraftElement
   constructor: (properties) ->
     properties.attributes ||= []
@@ -97,9 +100,6 @@ class GraftElement
   #      be prepended.
   #    * If there are no children, the new element will have a single string
   #      child that is the value of the `text` property.
-  #
-  # TODO Use Object.create for diff-cloning?
-  # TODO Tag modified attributes
   withProperties: (properties) ->
     children =
       if properties.text && properties.children
@@ -117,7 +117,7 @@ class GraftElement
       else
         @children
 
-    new GraftElement
+    copyGraftElementWithProperties this,
       name: properties.name || @name
       children: children
       attributes: properties.attributes || @attributes
@@ -128,7 +128,7 @@ class GraftElement
 
     @withProperties attributes: newAttributes
 
-window.structureFromElement = (element) ->
+window.structureFromElement = (element, elementType = GraftElement) ->
   structure = null
 
   children =
@@ -141,7 +141,7 @@ window.structureFromElement = (element) ->
       childrenSoFar
 
   structure =
-    new GraftElement
+    new elementType
       name: element.nodeName.toLowerCase()
       children: children
       attributes: fold element.attributes, {}, (attributesSoFar, attribute) ->
