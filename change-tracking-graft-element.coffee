@@ -15,10 +15,8 @@ class ChangeTrackingGraftElement extends GraftElement
     if properties.attributes?
       dirtyProperties.dirtyAttributes = (attribute for attribute, _ of properties.attributes)
 
-    copyGraftElementWithProperties = (element, updatedProperties) ->
+    super properties, (element, updatedProperties) ->
       new ChangeTrackingGraftElement updatedProperties, dirtyProperties
-
-    super properties
 
 existingStructureFromElement = window.structureFromElement
 window.structureFromElement = (element) ->
