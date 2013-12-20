@@ -9,11 +9,15 @@ class ChangeTrackingGraftElement extends GraftElement
   # updated as requested, the element is a `ChangeTrackingGraftElement` with
   # `dirtyProperties` set correctly.
   withProperties: (properties) ->
-    dirtyProperties = []
+    dirtyProperties = @dirtyProperties
     dirtyProperties.push 'name' if properties.name?
     dirtyProperties.push 'children' if properties.children?
     if properties.attributes?
-      dirtyProperties.dirtyAttributes = (attribute for attribute, _ of properties.attributes)
+      dirtyAttributes = (attribute for attribute, _ of properties.attributes)
+      if dirtyProperties.dirtyAttributes?
+        dirtyProperties.dirtyAttributes = dirtyProperties.dirtyAttributes.concat(dirtyAttributes)
+      else
+        dirtyProperties.dirtyAttributes = dirtyAttributes
 
     super properties, (element, updatedProperties) ->
       new ChangeTrackingGraftElement updatedProperties, dirtyProperties
