@@ -66,10 +66,10 @@ asMappableArray = (array) ->
   array: array
 
 copyGraftElementWithProperties = (element, updatedProperties) ->
-  new GraftElement updatedProperties
+  new GraftElement element.domElement, updatedProperties
 
 class GraftElement
-  constructor: (properties) ->
+  constructor: (@domElement, properties) ->
     properties.attributes ||= []
     this[property] = value for property, value of properties
 
@@ -141,7 +141,7 @@ window.structureFromElement = (element, elementType = GraftElement) ->
       childrenSoFar
 
   structure =
-    new elementType
+    new elementType element,
       name: element.nodeName.toLowerCase()
       children: children
       attributes: fold element.attributes, {}, (attributesSoFar, attribute) ->

@@ -1,6 +1,6 @@
 class ChangeTrackingGraftElement extends GraftElement
-  constructor: (properties, dirtyProperties) ->
-    super properties
+  constructor: (@domElement, properties, dirtyProperties) ->
+    super @domElement, properties
 
     @dirtyProperties = (property for property in (dirtyProperties || []) when property != 'dirtyAttributes')
     @dirtyAttributes = dirtyProperties?.dirtyAttributes || []
@@ -20,7 +20,7 @@ class ChangeTrackingGraftElement extends GraftElement
         dirtyProperties.dirtyAttributes = dirtyAttributes
 
     super properties, (element, updatedProperties) ->
-      new ChangeTrackingGraftElement updatedProperties, dirtyProperties
+      new ChangeTrackingGraftElement element.domElement, updatedProperties, dirtyProperties
 
 existingStructureFromElement = window.structureFromElement
 window.structureFromElement = (element) ->
