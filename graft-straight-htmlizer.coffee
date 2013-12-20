@@ -1,14 +1,29 @@
 window.htmlize = (graftStructure) ->
-  console.log 'now we have', graftStructure
   htmlElementFromElement(graftStructure)
 
 htmlElementFromElement = (element) ->
-  if typeof element == 'string'
-    document.createTextNode element
+  createDomElementForElement = (element) ->
+    if typeof element == 'string'
+      document.createTextNode element
+    else
+      domElement = document.createElement element.name
+      updateDomElementFromElement domElement, element
+
+  updateDomElementFromElement = (domElement, element) ->
+    if domElement.nodeName.toLowerCase() != element.name.toLowerCase()
+      createDomElementForElement element
+
+    domElement.setAttribute attribute, value for attribute, value of element.attributes
+    for child, i in element.children
+      childDomElement = htmlElementFromElement(child) 
+      if childDomElement.nodeType == Node.TEXT_NODE
+        domElement.replaceChild(childDomElement, domElement.childNodes[i])
+      else if ! childDomElement.parentNdoe? || childDomElement.parentNode != domElement
+        domElement.appendChild childDomElement
+
+    domElement
+
+  if element.domElement?
+    updateDomElementFromElement element.domElement, element
   else
-    htmlElement = document.createElement element.name
-    htmlElement.setAttribute attribute, value for attribute, value of element.attributes
-
-    htmlElement.appendChild htmlElementFromElement(child) for child in element.children
-
-    htmlElement
+    createDomElementForElement element
