@@ -100,7 +100,7 @@ class GraftElement
   #      be prepended.
   #    * If there are no children, the new element will have a single string
   #      child that is the value of the `text` property.
-  withProperties: (properties) ->
+  withProperties: (properties, copier = copyGraftElementWithProperties) ->
     children =
       if properties.text && properties.children
         [properties.text].concat(properties.children)
@@ -117,7 +117,7 @@ class GraftElement
       else
         @children
 
-    copyGraftElementWithProperties this,
+    copier this,
       name: properties.name || @name
       children: children
       attributes: properties.attributes || @attributes
