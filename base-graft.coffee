@@ -66,7 +66,7 @@ asMappableArray = (array) ->
   array: array
 
 copyGraftElementWithProperties = (element, updatedProperties) ->
-  new GraftElement properties
+  new GraftElement updatedProperties
 
 class GraftElement
   constructor: (properties) ->
