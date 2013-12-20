@@ -128,11 +128,11 @@ class GraftElement
 
     @withProperties attributes: newAttributes
 
-window.structureFromElement = (element, elementType = GraftElement) ->
+window.structureFromElement = (domElement, elementType = GraftElement) ->
   structure = null
 
   children =
-    fold element.childNodes, [], (childrenSoFar, child) ->
+    fold domElement.childNodes, [], (childrenSoFar, child) ->
       if child.nodeType == Node.TEXT_NODE
         childrenSoFar.push child.textContent || child.innerText
       else if child.nodeType == Node.ELEMENT_NODE
@@ -141,10 +141,10 @@ window.structureFromElement = (element, elementType = GraftElement) ->
       childrenSoFar
 
   structure =
-    new elementType element,
-      name: element.nodeName.toLowerCase()
+    new elementType domElement,
+      name: domElement.nodeName.toLowerCase()
       children: children
-      attributes: fold element.attributes, {}, (attributesSoFar, attribute) ->
+      attributes: fold domElement.attributes, {}, (attributesSoFar, attribute) ->
         attributesSoFar[attribute.name] = attribute.value
         attributesSoFar
 

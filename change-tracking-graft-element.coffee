@@ -23,5 +23,5 @@ class ChangeTrackingGraftElement extends GraftElement
       new ChangeTrackingGraftElement element.domElement, updatedProperties, dirtyProperties
 
 existingStructureFromElement = window.structureFromElement
-window.structureFromElement = (element) ->
-  existingStructureFromElement element, ChangeTrackingGraftElement
+window.structureFromElement = (domElement) ->
+  existingStructureFromElement domElement, ChangeTrackingGraftElement
