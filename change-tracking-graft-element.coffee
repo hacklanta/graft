@@ -5,6 +5,9 @@ class ChangeTrackingGraftElement extends GraftElement
     @dirtyProperties = (property for property in (dirtyProperties || []) when property != 'dirtyAttributes')
     @dirtyAttributes = dirtyProperties?.dirtyAttributes || []
 
+  isDirty: ->
+    @dirtyProperties.length || @dirtyAttributes.length
+
   # In addition to returning a copy of the element with existing properties
   # updated as requested, the element is a `ChangeTrackingGraftElement` with
   # `dirtyProperties` set correctly.
