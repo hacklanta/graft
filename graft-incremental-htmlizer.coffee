@@ -36,3 +36,20 @@ htmlElementFromElement = (element, recursive) ->
     updateDomElementFromElement element.domElement, element
   else
     createDomElementForElement element
+
+changedRoots = []
+scheduledAnimation = 0
+redrawElements = ->
+  htmlElementFromElement element, true for element in htmlizedRoots
+  scheduledAnimation = 0
+
+requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+                        window.webkitRequestAnimationFrame || window.msRequestAnimationFrame ||
+                        (fn) -> setTimeout fn
+$(document).ready ->
+  $(document).on 'element-changed', (event) ->
+    for element, i in htmlizedRoots when element == event.before
+      htmlizedRoots[i] = event.after
+
+    unless scheduledAnimation
+      scheduledAnimation = requestAnimationFrame redrawElements
