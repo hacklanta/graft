@@ -1,3 +1,10 @@
+window.graft = graft = {}
+graft.event = (name, data) ->
+  event = $.Event(name)
+  event[prop] = value for prop, value of data
+
+  $(document).trigger event
+
 class ChangeTrackingGraftElement extends GraftElement
   constructor: (@domElement, properties, dirtyProperties) ->
     super @domElement, properties
