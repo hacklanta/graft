@@ -1,7 +1,8 @@
 window.htmlize = (graftStructure) ->
-  htmlElementFromElement(graftStructure)
+  htmlElementFromElement(graftStructure, false)
 
-htmlElementFromElement = (element) ->
+htmlizedRoots = []
+htmlElementFromElement = (element, recursive) ->
   createDomElementForElement = (element) ->
     if typeof element == 'string'
       document.createTextNode element
@@ -19,7 +20,7 @@ htmlElementFromElement = (element) ->
 
     if 'children' in element.dirtyProperties
       for child, i in element.children when ! child.isDirty? || child.isDirty()
-        childDomElement = htmlElementFromElement(child) 
+        childDomElement = htmlElementFromElement(child, true)
 
         if childDomElement.nodeType == Node.TEXT_NODE
           domElement.replaceChild(childDomElement, domElement.childNodes[i])
@@ -27,6 +28,9 @@ htmlElementFromElement = (element) ->
           domElement.appendChild childDomElement
 
     domElement
+
+  if ! recursive
+    htmlizedRoots.push element
 
   if element.domElement?
     updateDomElementFromElement element.domElement, element
