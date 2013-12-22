@@ -213,12 +213,19 @@ class BaseGraft
           child
         else
           # First apply to children, then apply to this level.
+          dirty = false
+          updatedChildren = flatten(
+            for element in child.children
+              updated = updater(element)
+              dirty = true if updated != element
+
+              updated
+          )
           updatedChild =
-            child.withProperties
-              children: flatten(
-                for element in child.children
-                  updater(element)
-              )
+            if dirty
+              child.withProperties children: updatedChildren
+            else
+              child
 
           if selector(updatedChild)
             update updatedChild, transform(updatedChild)
