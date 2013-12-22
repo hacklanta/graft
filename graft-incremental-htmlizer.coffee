@@ -15,7 +15,7 @@ htmlElementFromElement = (element) ->
       createDomElementForElement element
 
     for attribute in element.dirtyAttributes
-      domElement.setAttribute attribute, value
+      domElement.setAttribute attribute, element.attributes[attribute]
 
     if 'children' in element.dirtyProperties
       for child, i in element.children when ! child.isDirty? || child.isDirty()
